@@ -1,0 +1,332 @@
+#import * from ./generated/prisma-schema.js'
+
+enum Permission {
+    ADMIN
+    SUPERUSER
+    CREATEATHLETE
+    CREATETEAM
+    UPDATETEAM
+    UPDATEATHLETE
+    UPDATECOACH
+    DELETEATHLETE
+    DELETECOACH
+    POST
+}
+
+enum UserType {
+    ATHLETE
+    COACH
+    HEADCOACH
+    PARENT
+}
+
+type Query {
+    users: [User!]
+    getAllWorkouts: [Workout!]
+    getUser(email: String!): UserPayload
+    getUserById(token: String!): User!
+    getAllTeams: [Team!]!
+    currentUser: User
+    getTeamInfo: Team!
+    getTeamById(id: String!): Team
+    getAthletes: [Athlete!]
+    coachDetails: Coach 
+    getAthleteById(id: String!): Athlete!
+}
+
+type Mutation {
+
+    athleteLogWorkout(
+        athleteId: String!
+        workoutId: String!
+        comment: String
+        percentCompleted: String!
+        rpe: Int!
+        difficulty: String!
+    ) : LogItem
+
+    assignWorkoutToAthlete(
+        athleteId: String!
+        workoutId: String!
+    ) : Athlete
+
+    createWorkout(
+        title: String!
+        description: String!
+        catagory: String!
+        sets: Int!
+        reps: Int!
+        restBetweenSets: String!
+        highIntensity: String!
+        lowIntensity: String!
+    ): Workout!
+
+    signupUser(
+        fullName: String!
+        email: String!
+        password: String!
+        confirmPassword: String!
+        teamId: String!
+        teamKey: String!
+        coachKey: String
+    ): UserPayload!
+
+    loginUser(
+        email: String!
+        password: String!
+    ): UserPayload!
+
+    createHeadCoach(
+        userId: String!
+        teamId: String!
+    ): HeadCoach!
+
+    createCoach(
+        userId: String!
+        teamId: String!
+        coachKey: String!
+        teamKey: String!
+    ): Coach!
+
+    requestReset(
+        email: String!
+    ): SuccessMessage!
+
+    resetPassword(
+        resetToken: String!
+        password: String!
+        confirmPassword: String!
+    ): User!
+
+    createAthleteStats(
+        athlete: String!
+        apeIndex: Int!
+        height: Int!
+        weight: Int!
+        maxVGrade: Int!
+        maxSportGrade: String!
+        maxEdgeLoad: Int!
+        maxEdgeTestSize: Int!
+        SWREdge: Float
+        maxPullLoad: Int!
+        SWRBar: Float
+        oneArmHangLoadLeft: Int!
+        oneArmHangLoadRight: Int!
+        oneArmHangSWR: Float!
+        goalVGrade: Int!
+        goalSportGrade: String!
+    ): AthletePayload
+
+    createTeam(
+        teamName: String!,
+        city: String!,
+        state: String!,
+        homeGym: String!,
+    ): TeamPayload
+
+    createSubTeam(
+        subTeamName: String!,
+        parentTeam: String!,
+        practiceDays: String,
+        coaches: String,
+        athletes: String,
+        description: String,
+    ): SubTeam
+
+    createPost(
+        title: String!
+        content: String!
+    ) : Post!
+}
+
+type AthletePayload {
+    athlete: Athlete!
+}
+
+type LibraryPayload {
+    workouts: [Workout!]!
+}
+
+type CoachPayload {
+    coach: Coach!
+    token: String!
+}
+
+type HeadCoachPayload {
+    headCoach: HeadCoach!
+    token: String!
+}
+
+type AuthPayload {
+    token: String
+    user: User
+    HeadCoach: Athlete
+}
+
+type UserPayload {
+    user: User
+    token: String!
+}
+
+type TeamPayload {
+    team: Team!
+}
+
+type SuccessMessage {
+    message: String!
+}
+
+type User {
+    id: ID!
+    team: Team
+    fullName: String!
+    email: String!
+    password: String!
+    permissions: [Permission!]
+    userType: UserType!
+    DOB: String
+    age: Int
+    phoneNumber: String
+}
+
+type Athlete {
+    id: ID!
+    user: User!
+    team: Team!
+    stats: AthleteStats
+    phase: String
+    injuryStatus: String
+    strengths: String
+    weaknesses: String
+    goals: [Goal!]
+    workouts: [Workout!]
+    logBook: [LogItem!]
+    athleteToTeamStartDate: String
+    athleteCLimbingStartDate: String
+}
+
+type Coach {
+    id: ID!
+    user: User!
+    team: Team!
+}
+
+type HeadCoach {
+    id: ID!
+    user: User!
+    team: Team
+}
+
+type Team {
+    id: ID!
+    teamName: String!
+    headCoach: HeadCoach
+    athletes: [Athlete!]
+    coaches: [Coach!] 
+    subTeams: [SubTeam!]
+    library: [Workout!]
+    posts: [Post!]
+    schedule: Schedule
+    phase: String
+    city: String!
+    state: String!
+    homeGym: String!
+}
+
+type Schedule {
+    id: ID!
+    createdBy: Coach
+    createdAt: String!
+    team: Team
+    athletes: [Athlete!]
+}
+
+type SubTeam {
+    id: ID!
+    subTeamName: String!
+    headCoach: HeadCoach! 
+    practiceDays: String!
+    parentTeam: Team!
+    athletes: [Athlete!]
+    coaches: [Coach!]
+    library: [Workout!]
+    posts: [Post!]
+}
+
+type Parent {
+    id: ID!
+    fullName: String!
+    email: String!
+    password: String!
+    athlete: [Athlete!] 
+    team: Team!
+}
+
+type Workout {
+    id: ID!
+    createdBy: User!
+    team: Team!
+    title: String!
+    description: String!
+    catagory: String!
+    sets: Int!
+    reps: Int!
+    restBetweenSets: String!
+    highIntensity: String!
+    lowIntensity: String!
+}
+
+type LogItem {
+    id: ID!
+    athlete: Athlete!
+    workout: Workout!
+    comment: String
+    percentCompleted: String!
+    rpe: Int!
+    difficulty: String!
+}
+
+type AthleteStats {
+    id: ID! 
+    athlete: Athlete!
+    createdAt: String!
+    createdBy: Coach!
+    apeIndex: Int!
+    height: Int!
+    weight: Int!
+    maxVGrade: Int!
+    maxSportGrade: String!
+    maxEdgeLoad: Int!
+    maxEdgeTestSize: Int!
+    SWREdge: Float
+    maxPullLoad: Int!
+    SWRBar: Float
+    oneArmHangLoadLeft: Int!
+    oneArmHangLoadRight: Int!
+    oneArmHangSWR: Float
+    goalVGrade: Int!
+    goalSportGrade: String!
+}
+
+type Post {
+    id: ID
+    postedBy: Coach!
+    title: String!
+    content: String!
+    comments: [Comment!]
+}
+
+type Comment {
+    post: Post!
+    coach: Coach
+    athlete: Athlete
+    content: String!
+}
+
+type Goal {
+    id: ID!
+    athlete: Athlete!
+    seasonGoal: String
+    yearGoal: String
+    competitionGoal: String
+}

@@ -1,0 +1,207 @@
+enum Permission {
+    ADMIN
+    SUPERUSER
+    CREATEATHLETE
+    CREATETEAM
+    UPDATETEAM
+    UPDATEATHLETE
+    UPDATECOACH
+    DELETEATHLETE
+    DELETECOACH
+    POST
+}
+
+enum UserType {
+    ATHLETE
+    COACH
+    HEADCOACH
+    PARENT
+}
+
+type User {
+    id: ID! @id
+    fullName: String!
+    email: String! @unique
+    team: Team!
+    phoneNumber: String
+    password: String!
+    resetToken: String
+    resetTokenExpirey: String
+    permissions: [Permission!] @scalarList(strategy: RELATION)
+    userType: UserType!
+    DOB: String
+    age: Int
+    createdAt: DateTime! @createdAt
+}
+
+type Athlete {
+    id: ID! @id
+    user: User!
+    createdAt: DateTime! @createdAt
+    team: Team
+    athleteToTeamStartDate: String
+    athleteCLimbingStartDate: String 
+    phase: String
+    injuryStatus: String
+    strengths: String
+    weaknesses: String
+    subTeam: SubTeam
+    goals: [Goal!]
+    parents: [Parent!]
+    athleteStats: AthleteStats @relation(link: TABLE, name: "AthleteOnStats")
+    athleteSchedule: AthleteSchedule @relation(link: INLINE, name:"AthleteOnSchedule")
+    workouts: [Workout!]
+    logBook: [LogItem!]
+}
+
+type HeadCoach {
+    id: ID! @id
+    user: User!
+    createdAt: DateTime! @createdAt
+    team: Team @relation(name: "HeadCoachToTeam")
+    subTeams: [SubTeam!] @relation(name: "HeadCoachToSubTeam")
+}
+
+type Coach {
+    id: ID! @id
+    user: User!
+    createdAt: DateTime! @createdAt
+    team: Team @relation(name: "CoachToTeam")
+    subTeams: [SubTeam!] @relation(name: "CoachToSubTeam")
+}
+
+type Parent {
+    id: ID! @id
+    user: User!
+    team: Team!
+    athlete: [Athlete!]
+}
+
+type Team {
+    id: ID! @id
+    teamName: String! @unique
+    headCoach: HeadCoach @relation(name: "HeadCoachToTeam" link: INLINE)
+    athletes: [Athlete!] @relation(link: TABLE)
+    coaches: [Coach!] @relation(name: "CoachToTeam" link: TABLE)
+    subTeams: [SubTeam!]
+    library: [Workout!]
+    posts: [Post!]
+    schedule: TeamSchedule @relation(link: INLINE)
+    phase: String
+    city: String!
+    state: String!
+    homeGym: String!
+    teamKey: String
+    coachKey: String
+}
+
+type SubTeam {
+    id: ID! @id
+    subTeamName: String!
+    subTeamSchedule: TeamSchedule
+    practiceDays: String
+    description: String
+    parentTeam: Team!
+    athletes: [Athlete!]
+    coaches: [Coach!] @relation(name: "CoachToSubTeam")
+    headCoach: HeadCoach! @relation(name: "HeadCoachToSubTeam")
+    library: [Workout!]
+    posts: [Post!]
+}
+
+type TeamSchedule {
+    id: ID! @id
+    createdBy: Coach
+    createdAt: DateTime! @createdAt
+    team: Team
+    athletes: [Athlete!]
+    library: [Workout!]
+}
+
+type AthleteSchedule {
+    id: ID! @id
+    createdBy: Coach! 
+    createdAt: DateTime! @createdAt
+    library: [Workout!]
+    athlete: Athlete! @relation(name: "AthleteOnSchedule")
+}
+
+type Workout {
+    id: ID! @id
+    createdBy: User!
+    team: Team!
+    title: String!
+    description: String!
+    catagory: String!
+    sets: Int!
+    reps: Int!
+    restBetweenSets: String!
+    highIntensity: String!
+    lowIntensity: String!
+}
+
+type LogItem {
+    id: ID! @id
+    athlete: Athlete!
+    workout: Workout!
+    createdAt: DateTime! @createdAt
+    comment: String
+    percentCompleted: String!
+    rpe: Int!
+    difficulty: String!
+}
+
+type Result {
+    id: ID! @id
+    rpe: Int
+    compResult: Int
+    sessionResult: String
+    athlete: Athlete!
+}
+
+type AthleteStats {
+    id: ID! @id
+    athlete: Athlete! @relation(name: "AthleteOnStats")
+    createdAt: DateTime! @createdAt
+    createdBy: Coach
+    apeIndex: Int!
+    height: Int!
+    weight: Int!
+    maxVGrade: Int!
+    maxSportGrade: String!
+    maxEdgeLoad: Int!
+    maxEdgeTestSize: Int!
+    SWREdge: Float
+    maxPullLoad: Int!
+    SWRBar: Float
+    oneArmHangLoadLeft: Int!
+    oneArmHangLoadRight: Int!
+    oneArmHangSWR: Float
+    goalVGrade: Int!
+    goalSportGrade: String!
+}
+
+type Post {
+    id: ID! @id
+    postedBy: Coach!
+    title: String!
+    content: String!
+    comments: [Comment!]
+}
+
+type Comment {
+    id: ID! @id
+    post: Post!
+    coach: Coach
+    athlete: Athlete
+    content: String!
+}
+
+type Goal {
+    id: ID! @id
+    createdAt: DateTime @createdAt
+    athlete: Athlete!
+    seasonGoal: String
+    yearGoal: String
+    competitionGoal: String
+}
