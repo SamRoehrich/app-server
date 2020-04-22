@@ -22,7 +22,7 @@ type User {
     id: ID! @id
     fullName: String!
     email: String! @unique
-    team: Team!
+    team: Team
     phoneNumber: String
     password: String!
     resetToken: String
@@ -30,7 +30,6 @@ type User {
     permissions: [Permission!] @scalarList(strategy: RELATION)
     userType: UserType!
     DOB: String
-    age: Int
     createdAt: DateTime! @createdAt
 }
 
@@ -48,7 +47,7 @@ type Athlete {
     subTeam: SubTeam
     goals: [Goal!]
     parents: [Parent!]
-    athleteStats: AthleteStats @relation(link: TABLE, name: "AthleteOnStats")
+    athleteStats: [AthleteStats!] @relation(link: TABLE name:"AthleteStatsToAthlete")
     athleteSchedule: AthleteSchedule @relation(link: INLINE, name:"AthleteOnSchedule")
     workouts: [Workout!]
     logBook: [LogItem!]
@@ -130,6 +129,7 @@ type Workout {
     id: ID! @id
     createdBy: User!
     team: Team!
+    loggedSessions: [LogItem!]
     title: String!
     description: String!
     catagory: String!
@@ -161,9 +161,11 @@ type Result {
 
 type AthleteStats {
     id: ID! @id
-    athlete: Athlete! @relation(name: "AthleteOnStats")
+    athlete: Athlete! @relation(name:"AthleteStatsToAthlete")
     createdAt: DateTime! @createdAt
     createdBy: Coach
+    lengthUnit: String!
+    weightUnit: String!
     apeIndex: Int!
     height: Int!
     weight: Int!

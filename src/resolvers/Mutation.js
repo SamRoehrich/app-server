@@ -21,14 +21,7 @@ async function athleteLogWorkout(parent, args, { req, prisma }, info) {
         difficulty: args.difficulty
     })
 
-    //add log item to athlete
-    const updatedAthlete = await prisma.updateAthlete({
-        logBook: {
-            connect: { id: logItem.id }
-        }
-    })
-
-    return updatedAthlete
+    return logItem
 }
 
 //args: workout id, athlete id
@@ -55,9 +48,6 @@ async function assignWorkoutToAthlete(parent, args, { req, prisma }, info) {
 
 async function createWorkout(parent, args, { req, prisma }, info) {
 
-    //BROKEN: does not return expected values after mutation runs
-    //data is still set to the db and is queryable from the getTeamById query
-
     //validate user
     if(!req.user) throw new Error('Not Authenticated')
 
@@ -70,16 +60,10 @@ async function createWorkout(parent, args, { req, prisma }, info) {
         team: { connect: { id: team.id } },
         ...args
     })
-    
-    //add workout to the team library
-    const updatedTeam = await prisma.updateTeam({
-        library: {
-            connect: { id: workout.id }
-        }
-    })
 
     return workout
 }
+
 
 async function signupUser(parent, args, { prisma }, info) {
     //1: check is passwords are valid
@@ -90,8 +74,6 @@ async function signupUser(parent, args, { prisma }, info) {
     const team = await prisma.team({ id: args.teamId })
     //4: check team key matches
     if(args.teamKey !== team.teamKey) throw new Error('Invalid team key')
-    //calculate age
-    const age = calculateAge(args.dob)
     //5: check if coach key matches
     if(args.coachKey == team.coachKey){
         //6: if coach key matches create a user
@@ -100,7 +82,6 @@ async function signupUser(parent, args, { prisma }, info) {
             email: args.email,
             phoneNumber: args.phoneNumber,
             DOB: args.dob,
-            age,
             password,
             team:{ connect: { id: team.id } },
             userType: 'COACH',
@@ -122,7 +103,6 @@ async function signupUser(parent, args, { prisma }, info) {
             email: args.email,
             phoneNumber: args.phoneNumber,
             DOB: args.dob,
-            age,
             password,
             team:{ connect: { id: team.id } },
             userType: 'ATHLETE',

@@ -64,6 +64,7 @@ type Mutation {
     signupUser(
         fullName: String!
         email: String!
+        dob: String!
         password: String!
         confirmPassword: String!
         teamId: String!
@@ -115,7 +116,9 @@ type Mutation {
         oneArmHangSWR: Float!
         goalVGrade: Int!
         goalSportGrade: String!
-    ): AthletePayload
+        lengthUnit: String!
+        weightUnit: String!
+    ): Athlete
 
     createTeam(
         teamName: String!,
@@ -266,6 +269,7 @@ type Workout {
     id: ID!
     createdBy: User!
     team: Team!
+    loggedSessions: [LogItem!]
     title: String!
     description: String!
     catagory: String!
