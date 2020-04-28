@@ -37,7 +37,7 @@ async function getAthleteById(parent, args, { prisma }, info) {
 }
 
 async function currentUser(parent, args, { req, prisma }, info) {
-    if(!req.user) throw new Error('Not Authenticated')
+    if(!req.user) throw new Error('Not Authenticated: current user query')
 
     const user = await prisma.user({ id: req.user.id })
 

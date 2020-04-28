@@ -38,7 +38,34 @@ const resolvers = {
     Goal
 }
 
+
 const startServer = async () => {
+    
+    const app = express()
+    
+    app.use(cookieParser())
+    
+    //decode the jwt on each request
+    app.use(async (req, res, next) => {
+        const { token } = await req.cookies;
+        if(token) {
+            const { user }  = await jwt.verify(token, APP_SECRET);
+            req.user = user;
+        }
+        next();
+    })
+    
+    //add user to ctx for every request 
+    app.use(async (req, res, next) => {
+        if(!req.user) return next()
+        
+        const user = await prisma.user({ id: req.user })
+        //not sure what the commented out code below does or why it is here 
+        // const team = await prisma.user({ id: req.user}).team()
+        req.user = user
+        next()
+    })
+    
     const server = new ApolloServer({
         typeDefs,
         resolvers,
@@ -48,33 +75,7 @@ const startServer = async () => {
         //     apiKey: ""
         // }
     })
-
-
-    const app = express()
-
-    app.use(cookieParser())
-
-    //decode the jwt on each request
-    app.use((req, res, next) => {
-        const { token } = req.cookies;
-        if(token) {
-            const { user }  = jwt.verify(token, APP_SECRET);
-            req.user = user;
-        }
-        next();
-    })
-
-    //add user to ctx for every request 
-    app.use(async (req, res, next) => {
-        if(!req.user) return next()
-
-        const user = await prisma.user({ id: req.user })
-        const team = await prisma.user({ id: req.user}).team()
-        console.log(team)
-        req.user = user
-        next()
-    })
-
+    
     server.applyMiddleware({
         app,
         cors: {
@@ -82,9 +83,9 @@ const startServer = async () => {
             origin: 'http://localhost:3000'
         }
     })
-
+    
     app.listen({ port: 4000}, () => 
-        console.log(`'server ready at localhost:4000${server.graphqlPath}'`)
+    console.log(`'server ready at localhost:4000${server.graphqlPath}'`)
     )
 }
 

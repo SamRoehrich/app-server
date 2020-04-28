@@ -196,7 +196,7 @@ type Athlete {
     id: ID!
     user: User!
     team: Team!
-    stats: AthleteStats
+    stats: [AthleteStats!]
     phase: String
     injuryStatus: String
     strengths: String
@@ -284,6 +284,7 @@ type LogItem {
     id: ID!
     athlete: Athlete!
     workout: Workout!
+    createdAt: String
     comment: String
     percentCompleted: String!
     rpe: Int!
@@ -295,6 +296,8 @@ type AthleteStats {
     athlete: Athlete!
     createdAt: String!
     createdBy: Coach!
+    lengthUnit: String!
+    weightUnit: String!
     apeIndex: Int!
     height: Int!
     weight: Int!
